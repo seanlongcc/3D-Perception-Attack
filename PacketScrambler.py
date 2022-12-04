@@ -1,6 +1,7 @@
 import os
 import time
 from PyQt5 import QtWidgets, QtCore
+from PyQt5.QtGui import QIntValidator
 from scapy.all import *
 from scapy.layers.inet import IP
 
@@ -28,6 +29,18 @@ layout.addWidget(directory_field)
 file_name_field = QtWidgets.QLineEdit()
 file_name_field.setPlaceholderText('Enter output file name (optional)')
 layout.addWidget(file_name_field)
+
+# Create a text field for entering the corruption level
+corruption_field = QtWidgets.QLineEdit()
+corruption_field.setPlaceholderText(
+    'Enter corruption level from 1-100 (optional)')
+
+# Create an integer validator and set it on the text field with a range of 1-100
+validator = QIntValidator()
+validator.setRange(1, 100)
+corruption_field.setValidator(validator)
+layout.addWidget(corruption_field)
+
 
 # Create a button for starting the packet scrambling
 scramble_button = QtWidgets.QPushButton('Scramble Packets')
@@ -62,6 +75,24 @@ progress_bar.setAlignment(QtCore.Qt.AlignCenter)
 progress_bar.setValue(int(0))
 
 
+def on_text_changed():
+    # Get the current text in the text field
+    text = corruption_field.text()
+
+    # Check if the text is a number greater than 100
+    if text.isdigit() and int(text) > 100:
+        # Set the text to 100 if it is greater than 100
+        corruption_field.setText("100")
+
+        # Move the cursor to the end of the text field
+        cursor = corruption_field.cursorPosition()
+        corruption_field.setCursorPosition(cursor)
+
+
+# Connect the textChanged signal to the custom slot
+corruption_field.textChanged.connect(on_text_changed)
+
+
 def progressBar():
     # Reset progress bar
     progress_bar.setValue(int(0))
@@ -77,7 +108,8 @@ def progressBar():
     return count
 
 
-def scrambling_algorithm(packet):
+def scrambling_algorithm(packet, weight=0):
+    weight = weight
     # Get the raw bytes of the packet
     packet_bytes = bytes(packet)
 
@@ -95,8 +127,8 @@ def scrambling_algorithm(packet):
     return scrambled_packet
 
 
-def bitflip_corrupt(packet, weight: float = 0.2, min_bits: int = 1, max_bits: int = 8):
-    """flips bits with given probability weight per byte and min/max bits to flip per byte"""
+def bitflip_corrupt(packet, weight=0.2, min_bits: int = 1, max_bits: int = 8):
+    # flips bits with given probability weight per byte and min/max bits to flip per byte
     # convert packet to list for operations
     contents_list = list(bytes(packet))
 
@@ -202,6 +234,7 @@ def ScramblePackets(scrambling_method):
     # Get the directory and file name from the text fields
     directory = directory_field.text()
     file_name = file_name_field.text()
+    weight = int(corruption_field.text()) * .01
     if os.path.exists(directory) == True:
         # If no file name was entered, generate a unique file name using the current timestamp
         if not file_name:
@@ -221,10 +254,13 @@ def ScramblePackets(scrambling_method):
         # Read in the PCAP file using Scapy's rdpcap function
         packets = rdpcap(directory)
 
+        # Print out input values
+        print(f'{scrambling_method.__name__} with weight {weight}.')
+
         # Iterate through each packet in the file and apply the scrambling algorithm
         scrambled_packets = []
         for packet in packets:
-            scrambled_packet = scrambling_method(packet)
+            scrambled_packet = scrambling_method(packet, weight)
             scrambled_packets.append(scrambled_packet)
             # Increase counted file by one
             count += 1
@@ -237,6 +273,8 @@ def ScramblePackets(scrambling_method):
 
         # Write the scrambled packets to a new PCAP file using Scapy's wrpcap function
         wrpcap(file_name, scrambled_packets)
+
+        print(f'{scrambling_method.__name__} with weight {weight} SUCCESS.')
 
     else:
         # Handle the error
@@ -259,7 +297,7 @@ def ScrambleMethodZero():
     ScramblePackets(zero_corrupt)
 
 
-# Connect the 'clicked' signal of the scramble_button to the ScramblePackets function
+# Connect the 'clicked' signal of the a to the ScramblePackets function
 scramble_button.clicked.connect(ScrambleMethodScramble)
 bitflip_button.clicked.connect(ScrambleMethodBitFlip)
 one_button.clicked.connect(ScrambleMethodOne)
