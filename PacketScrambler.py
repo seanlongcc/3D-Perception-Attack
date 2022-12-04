@@ -33,7 +33,7 @@ layout.addWidget(file_name_field)
 # Create a text field for entering the corruption level
 corruption_field = QtWidgets.QLineEdit()
 corruption_field.setPlaceholderText(
-    'Enter corruption level from 1-100 (optional)')
+    'Enter corruption weight from 1-100 (optional)')
 
 # Create an integer validator and set it on the text field with a range of 1-100
 validator = QIntValidator()
@@ -108,8 +108,7 @@ def progressBar():
     return count
 
 
-def scrambling_algorithm(packet, weight=0):
-    weight = weight
+def scrambling_algorithm(packet, weight):
     # Get the raw bytes of the packet
     packet_bytes = bytes(packet)
 
@@ -234,7 +233,14 @@ def ScramblePackets(scrambling_method):
     # Get the directory and file name from the text fields
     directory = directory_field.text()
     file_name = file_name_field.text()
-    weight = int(corruption_field.text()) * .01
+
+    # Sets a defualt weight
+    weight = .2
+
+    # Sets the custom weight
+    if corruption_field.text() != '':
+        weight = int(corruption_field.text()) * .01
+
     if os.path.exists(directory) == True:
         # If no file name was entered, generate a unique file name using the current timestamp
         if not file_name:
@@ -255,10 +261,15 @@ def ScramblePackets(scrambling_method):
         packets = rdpcap(directory)
 
         # Print out input values
-        print(f'{scrambling_method.__name__} with weight {weight}.')
+        if scrambling_method != scrambling_algorithm:
+            print(
+                f'{scrambling_method.__name__} with weight {int(weight * 100)} started.')
+        else:
+            print(f'{scrambling_method.__name__} started.')
 
         # Iterate through each packet in the file and apply the scrambling algorithm
         scrambled_packets = []
+
         for packet in packets:
             scrambled_packet = scrambling_method(packet, weight)
             scrambled_packets.append(scrambled_packet)
@@ -274,7 +285,11 @@ def ScramblePackets(scrambling_method):
         # Write the scrambled packets to a new PCAP file using Scapy's wrpcap function
         wrpcap(file_name, scrambled_packets)
 
-        print(f'{scrambling_method.__name__} with weight {weight} SUCCESS.')
+        if scrambling_method != scrambling_algorithm:
+            print(
+                f'{scrambling_method.__name__} with weight {int(weight * 100)} SUCCESS.')
+        else:
+            print(f'{scrambling_method.__name__} SUCCESS.')
 
     else:
         # Handle the error
