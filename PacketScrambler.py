@@ -285,6 +285,7 @@ def ScramblePackets(scrambling_method):
         # Write the scrambled packets to a new PCAP file using Scapy's wrpcap function
         wrpcap(file_name, scrambled_packets)
 
+        # Print success message
         if scrambling_method != scrambling_algorithm:
             print(
                 f'{scrambling_method.__name__} with weight {int(weight * 100)} SUCCESS.')
