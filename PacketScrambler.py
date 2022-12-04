@@ -82,6 +82,127 @@ def apply_scrambling_algorithm(packet):
     # Return the scrambled packet
     return scrambled_packet
 
+def bitflip_corrupt(packet, weight: float = 0.2, min_bits: int = 1, max_bits: int = 8):
+    """flips bits with given probability weight per byte and min/max bits to flip per byte"""
+    # convert packet to list for operations
+    contents_list = list(bytes(packet))
+    
+    # sanity checks
+    if max_bits > 8:
+        raise ValueError()
+    if min_bits < 0:
+        raise ValueError()
+    if min_bits > max_bits:
+        raise ValueError()
+    if (weight <= 0) or (weight > 1):
+        raise ValueError()
+
+    # bitflipping logic starts here
+    new_contents_list = []
+    for byte in contents_list:
+        if random.random() <= weight:
+            # generate the bit-flipper byte
+            bits = random.randint(min_bits, max_bits)
+            flipped_bits = random.sample(range(8), bits)
+            flipper = sum([2**i for i in flipped_bits])
+            # xors flipper with original value
+            new_byte = byte ^ flipper
+        else:
+            new_byte = byte
+        new_contents_list.append(new_byte)
+
+    # Create a Scapy packet from the scrambled packet data
+    new_contents = bytes(new_contents_list)
+    packet_length = len(new_contents_list)
+    new_packet = IP(new_contents, len=packet_length)
+    return new_packet
+
+def one_corrupt(packet, weight: float = 0.2, min_bits: int = 1, max_bits: int = 8):
+    """flips bits with given probability weight per byte and min/max bits to flip per byte"""
+    # convert packet to list for operations
+    contents_list = list(bytes(packet))
+    
+    # sanity checks
+    if max_bits > 8:
+        raise ValueError()
+    if min_bits < 0:
+        raise ValueError()
+    if min_bits > max_bits:
+        raise ValueError()
+    if (weight <= 0) or (weight > 1):
+        raise ValueError()
+
+    # bitflipping logic starts here
+    new_contents_list = []
+    for byte in contents_list:
+        if random.random() <= weight:
+            # generate the bit-flipper byte
+            bits = random.randint(min_bits, max_bits)
+            oner_bits = random.sample(range(8), bits)
+            oner = sum([2**i for i in oner_bits])
+            # xors flipper with original value
+            new_byte = byte | oner
+        else:
+            new_byte = byte
+        new_contents_list.append(new_byte)
+
+    # Create a Scapy packet from the scrambled packet data
+    new_contents = bytes(new_contents_list)
+    packet_length = len(new_contents_list)
+    new_packet = IP(new_contents, len=packet_length)
+    return new_packet
+
+def zero_corrupt(packet, weight: float = 0.2, min_bits: int = 1, max_bits: int = 8):
+    """zeroes bits with given probability weight per byte and min/max bits to zero per byte"""
+    # convert packet to list for operations
+    contents_list = list(bytes(packet))
+    
+    # sanity checks
+    if max_bits > 8:
+        raise ValueError()
+    if min_bits < 0:
+        raise ValueError()
+    if min_bits > max_bits:
+        raise ValueError()
+    if (weight <= 0) or (weight > 1):
+        raise ValueError()
+
+    # bitflipping logic starts here
+    new_contents_list = []
+    for byte in contents_list:
+        if random.random() <= weight:
+            # generate the bit-zero byte
+            bits = random.randint(min_bits, max_bits)
+            zeroer_bits = random.sample(range(8), 8 - bits)
+            zeroer = sum([2**i for i in zeroer_bits])
+            # xors flipper with original value
+            new_byte = byte & zeroer
+        else:
+            new_byte = byte
+        new_contents_list.append(new_byte)
+    return new_contents_list
+
+def deletion_corrupt(contents_list: list, weight: float = 0.2):
+    """removes bytes with given probability weight per byte"""
+    # sanity checks
+    if (weight <= 0) or (weight > 1):
+        raise ValueError()
+
+    # bitflipping logic starts here
+    new_contents_list = []
+    for byte in contents_list:
+        if random.random() <= weight:
+            pass
+        else:
+            new_byte = byte
+			new_contents_list.append(new_byte)
+
+    # Create a Scapy packet from the scrambled packet data
+    new_contents = bytes(new_contents_list)
+    packet_length = len(new_contents_list)
+    new_packet = IP(new_contents, len=packet_length)
+    return new_packet
+
 
 def ScramblePackets():
     # Get the directory and file name from the text fields
