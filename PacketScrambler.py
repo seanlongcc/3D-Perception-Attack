@@ -33,6 +33,18 @@ layout.addWidget(file_name_field)
 scramble_button = QtWidgets.QPushButton('Scramble Packets')
 layout.addWidget(scramble_button)
 
+# Create a button for starting the packet scrambling
+bitflip_button = QtWidgets.QPushButton('Bit Flip Packets')
+layout.addWidget(bitflip_button)
+
+# Create a button for starting the packet scrambling
+one_button = QtWidgets.QPushButton('One Corrupt Packets')
+layout.addWidget(one_button)
+
+# Create a button for starting the packet scrambling
+zero_button = QtWidgets.QPushButton('Zero Corrupt Packets')
+layout.addWidget(zero_button)
+
 # Create a progress bar for displaying the progress percentage
 progress_bar = QtWidgets.QProgressBar()
 
@@ -65,7 +77,7 @@ def progressBar():
     return count
 
 
-def apply_scrambling_algorithm(packet):
+def scrambling_algorithm(packet):
     # Get the raw bytes of the packet
     packet_bytes = bytes(packet)
 
@@ -120,7 +132,7 @@ def bitflip_corrupt(packet, weight: float = 0.2, min_bits: int = 1, max_bits: in
 
 
 def one_corrupt(packet, weight: float = 0.2, min_bits: int = 1, max_bits: int = 8):
-    """flips bits with given probability weight per byte and min/max bits to flip per byte"""
+    # flips bits with given probability weight per byte and min/max bits to flip per byte
     # convert packet to list for operations
     contents_list = list(bytes(packet))
 
@@ -156,7 +168,7 @@ def one_corrupt(packet, weight: float = 0.2, min_bits: int = 1, max_bits: int = 
 
 
 def zero_corrupt(packet, weight: float = 0.2, min_bits: int = 1, max_bits: int = 8):
-    """zeroes bits with given probability weight per byte and min/max bits to zero per byte"""
+    # zeroes bits with given probability weight per byte and min/max bits to zero per byte
     # convert packet to list for operations
     contents_list = list(bytes(packet))
 
@@ -186,38 +198,15 @@ def zero_corrupt(packet, weight: float = 0.2, min_bits: int = 1, max_bits: int =
     return new_contents_list
 
 
-def deletion_corrupt(contents_list: list, weight: float = 0.2):
-    """removes bytes with given probability weight per byte"""
-    # sanity checks
-    if (weight <= 0) or (weight > 1):
-        raise ValueError()
-
-    # bitflipping logic starts here
-    new_contents_list = []
-    for byte in contents_list:
-        if random.random() <= weight:
-            pass
-        else:
-            new_byte = byte
-            new_contents_list.append(new_byte)
-
-    # Create a Scapy packet from the scrambled packet data
-    new_contents = bytes(new_contents_list)
-    packet_length = len(new_contents_list)
-    new_packet = IP(new_contents, len=packet_length)
-    return new_packet
-
-
-def ScramblePackets():
+def ScramblePackets(scrambling_method):
     # Get the directory and file name from the text fields
     directory = directory_field.text()
     file_name = file_name_field.text()
-
     if os.path.exists(directory) == True:
         # If no file name was entered, generate a unique file name using the current timestamp
         if not file_name:
             timestamp = int(time.time())
-            file_name = f'scrambled_{timestamp}.pcapng'
+            file_name = f'{scrambling_method.__name__}_{timestamp}.pcapng'
         else:
             # Append '.pcapng' to the file name if it is not already present
             if not file_name.endswith('.pcapng'):
@@ -235,7 +224,7 @@ def ScramblePackets():
         # Iterate through each packet in the file and apply the scrambling algorithm
         scrambled_packets = []
         for packet in packets:
-            scrambled_packet = apply_scrambling_algorithm(packet)
+            scrambled_packet = scrambling_method(packet)
             scrambled_packets.append(scrambled_packet)
             # Increase counted file by one
             count += 1
@@ -254,14 +243,27 @@ def ScramblePackets():
         print("The directory does not exist or you do not have permission to access it.")
 
 
-# Connect the 'returnPressed' signal of the directory_field to the ScramblePackets function
-directory_field.returnPressed.connect(ScramblePackets)
+def ScrambleMethodScramble():
+    ScramblePackets(scrambling_algorithm)
 
-# Connect the 'returnPressed' signal of the file_name_field to the ScramblePackets function
-file_name_field.returnPressed.connect(ScramblePackets)
+
+def ScrambleMethodBitFlip():
+    ScramblePackets(bitflip_corrupt)
+
+
+def ScrambleMethodOne():
+    ScramblePackets(one_corrupt)
+
+
+def ScrambleMethodZero():
+    ScramblePackets(zero_corrupt)
+
 
 # Connect the 'clicked' signal of the scramble_button to the ScramblePackets function
-scramble_button.clicked.connect(ScramblePackets)
+scramble_button.clicked.connect(ScrambleMethodScramble)
+bitflip_button.clicked.connect(ScrambleMethodBitFlip)
+one_button.clicked.connect(ScrambleMethodOne)
+zero_button.clicked.connect(ScrambleMethodZero)
 
 # Set the layout of the window
 window.setLayout(layout)
