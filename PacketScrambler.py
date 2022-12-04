@@ -195,7 +195,7 @@ def deletion_corrupt(contents_list: list, weight: float = 0.2):
             pass
         else:
             new_byte = byte
-			new_contents_list.append(new_byte)
+	new_contents_list.append(new_byte)
 
     # Create a Scapy packet from the scrambled packet data
     new_contents = bytes(new_contents_list)
