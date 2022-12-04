@@ -82,11 +82,12 @@ def apply_scrambling_algorithm(packet):
     # Return the scrambled packet
     return scrambled_packet
 
+
 def bitflip_corrupt(packet, weight: float = 0.2, min_bits: int = 1, max_bits: int = 8):
     """flips bits with given probability weight per byte and min/max bits to flip per byte"""
     # convert packet to list for operations
     contents_list = list(bytes(packet))
-    
+
     # sanity checks
     if max_bits > 8:
         raise ValueError()
@@ -117,11 +118,12 @@ def bitflip_corrupt(packet, weight: float = 0.2, min_bits: int = 1, max_bits: in
     new_packet = IP(new_contents, len=packet_length)
     return new_packet
 
+
 def one_corrupt(packet, weight: float = 0.2, min_bits: int = 1, max_bits: int = 8):
     """flips bits with given probability weight per byte and min/max bits to flip per byte"""
     # convert packet to list for operations
     contents_list = list(bytes(packet))
-    
+
     # sanity checks
     if max_bits > 8:
         raise ValueError()
@@ -152,11 +154,12 @@ def one_corrupt(packet, weight: float = 0.2, min_bits: int = 1, max_bits: int = 
     new_packet = IP(new_contents, len=packet_length)
     return new_packet
 
+
 def zero_corrupt(packet, weight: float = 0.2, min_bits: int = 1, max_bits: int = 8):
     """zeroes bits with given probability weight per byte and min/max bits to zero per byte"""
     # convert packet to list for operations
     contents_list = list(bytes(packet))
-    
+
     # sanity checks
     if max_bits > 8:
         raise ValueError()
@@ -182,6 +185,7 @@ def zero_corrupt(packet, weight: float = 0.2, min_bits: int = 1, max_bits: int =
         new_contents_list.append(new_byte)
     return new_contents_list
 
+
 def deletion_corrupt(contents_list: list, weight: float = 0.2):
     """removes bytes with given probability weight per byte"""
     # sanity checks
@@ -195,7 +199,7 @@ def deletion_corrupt(contents_list: list, weight: float = 0.2):
             pass
         else:
             new_byte = byte
-			new_contents_list.append(new_byte)
+            new_contents_list.append(new_byte)
 
     # Create a Scapy packet from the scrambled packet data
     new_contents = bytes(new_contents_list)
