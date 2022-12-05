@@ -1,5 +1,6 @@
 import os
 import time
+import random
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtGui import QIntValidator
 from scapy.all import *
