@@ -13,7 +13,7 @@ app = QtWidgets.QApplication([])
 window = QtWidgets.QWidget()
 
 # Set the size of the window using the setGeometry() method
-window.setGeometry(100, 100, 275, 100)
+window.setGeometry(100, 100, 350, 100)
 
 # Set the title of the window using the setWindowTitle() method
 window.setWindowTitle('Packet Scrambler')
@@ -39,7 +39,7 @@ corruption_field.setPlaceholderText(
 # Create a text field for entering the corruption level
 proportion_field = QtWidgets.QLineEdit()
 proportion_field.setPlaceholderText(
-    'Enter proportion of packets to corrupt from 1-100% (optional)')
+    'Enter proportion of packets to corrupt from 1%-100% (optional)')
 
 # Create an integer validator and set it on the text field with a range of 1-100
 validator = QIntValidator()
@@ -94,7 +94,7 @@ def on_text_changed():
         # Move the cursor to the end of the text field
         cursor = corruption_field.cursorPosition()
         corruption_field.setCursorPosition(cursor)
-        
+
     # Get the current text in the text field
     text = proportion_field.text()
 
@@ -260,15 +260,15 @@ def ScramblePackets(scrambling_method):
     file_name = file_name_field.text()
 
     if directory.endswith('.pcap') or directory.endswith('.pcapng'):
-        # Sets a default weight
+        # Sets a default weight and proportion
         weight = .2
-        proportion = 1.0
+        proportion = .2
 
         # Sets the custom weight
         if corruption_field.text() != '':
             weight = int(corruption_field.text()) * .01
         if proportion_field.text() != '':
-            weight = int(proportion_field.text()) * .01
+            proportion = int(proportion_field.text()) * .01
 
         if os.path.exists(directory) == True:
             # If no file name was entered, generate a unique file name using the current timestamp
@@ -292,7 +292,7 @@ def ScramblePackets(scrambling_method):
             # Print out input values
             if scrambling_method != scrambling_algorithm:
                 print(
-                    f'{scrambling_method.__name__} with weight {int(weight * 100)} started.')
+                    f'{scrambling_method.__name__} with weight {int(weight * 100)} and proportion {int(proportion * 100)} started.')
             else:
                 print(f'{scrambling_method.__name__} started.')
 
@@ -320,7 +320,8 @@ def ScramblePackets(scrambling_method):
             # Print success message
             if scrambling_method != scrambling_algorithm:
                 print(
-                    f'{scrambling_method.__name__} with weight {int(weight * 100)} SUCCESS.')
+                    f'{scrambling_method.__name__} with weight {int(weight * 100)} and proportion {int(proportion * 100)} SUCCESS.')
+
             else:
                 print(f'{scrambling_method.__name__} SUCCESS.')
 
