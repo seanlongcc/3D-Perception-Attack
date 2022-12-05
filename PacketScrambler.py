@@ -235,67 +235,71 @@ def ScramblePackets(scrambling_method):
     directory = directory_field.text()
     file_name = file_name_field.text()
 
-    # Sets a defualt weight
-    weight = .2
+    if directory.endswith('.pcap') or directory.endswith('.pcapng'):
+        # Sets a defualt weight
+        weight = .2
 
-    # Sets the custom weight
-    if corruption_field.text() != '':
-        weight = int(corruption_field.text()) * .01
+        # Sets the custom weight
+        if corruption_field.text() != '':
+            weight = int(corruption_field.text()) * .01
 
-    if os.path.exists(directory) == True:
-        # If no file name was entered, generate a unique file name using the current timestamp
-        if not file_name:
-            timestamp = int(time.time())
-            file_name = f'{scrambling_method.__name__}_{timestamp}.pcapng'
+        if os.path.exists(directory) == True:
+            # If no file name was entered, generate a unique file name using the current timestamp
+            if not file_name:
+                timestamp = int(time.time())
+                file_name = f'{scrambling_method.__name__}_{timestamp}.pcapng'
+            else:
+                # Append '.pcapng' to the file name if it is not already present
+                if not file_name.endswith('.pcapng'):
+                    file_name += '.pcapng'
+
+            # Get the total number of packets
+            total_packets = progressBar()
+
+            # Counter for progress bar
+            count = 0
+
+            # Read in the PCAP file using Scapy's rdpcap function
+            packets = rdpcap(directory)
+
+            # Print out input values
+            if scrambling_method != scrambling_algorithm:
+                print(
+                    f'{scrambling_method.__name__} with weight {int(weight * 100)} started.')
+            else:
+                print(f'{scrambling_method.__name__} started.')
+
+            # Iterate through each packet in the file and apply the scrambling algorithm
+            scrambled_packets = []
+
+            for packet in packets:
+                scrambled_packet = scrambling_method(packet, weight)
+                scrambled_packets.append(scrambled_packet)
+                # Increase counted file by one
+                count += 1
+
+                # Calculate the current progress as a percentage
+                progress = (count + 1) / total_packets * 100
+
+                # Convert the progress value to an integer before setting it on the progress bar
+                progress_bar.setValue(int(progress))
+
+            # Write the scrambled packets to a new PCAP file using Scapy's wrpcap function
+            wrpcap(file_name, scrambled_packets)
+
+            # Print success message
+            if scrambling_method != scrambling_algorithm:
+                print(
+                    f'{scrambling_method.__name__} with weight {int(weight * 100)} SUCCESS.')
+            else:
+                print(f'{scrambling_method.__name__} SUCCESS.')
+
         else:
-            # Append '.pcapng' to the file name if it is not already present
-            if not file_name.endswith('.pcapng'):
-                file_name += '.pcapng'
-
-        # Get the total number of packets
-        total_packets = progressBar()
-
-        # Counter for progress bar
-        count = 0
-
-        # Read in the PCAP file using Scapy's rdpcap function
-        packets = rdpcap(directory)
-
-        # Print out input values
-        if scrambling_method != scrambling_algorithm:
+            # Handle the error
             print(
-                f'{scrambling_method.__name__} with weight {int(weight * 100)} started.')
-        else:
-            print(f'{scrambling_method.__name__} started.')
-
-        # Iterate through each packet in the file and apply the scrambling algorithm
-        scrambled_packets = []
-
-        for packet in packets:
-            scrambled_packet = scrambling_method(packet, weight)
-            scrambled_packets.append(scrambled_packet)
-            # Increase counted file by one
-            count += 1
-
-            # Calculate the current progress as a percentage
-            progress = (count + 1) / total_packets * 100
-
-            # Convert the progress value to an integer before setting it on the progress bar
-            progress_bar.setValue(int(progress))
-
-        # Write the scrambled packets to a new PCAP file using Scapy's wrpcap function
-        wrpcap(file_name, scrambled_packets)
-
-        # Print success message
-        if scrambling_method != scrambling_algorithm:
-            print(
-                f'{scrambling_method.__name__} with weight {int(weight * 100)} SUCCESS.')
-        else:
-            print(f'{scrambling_method.__name__} SUCCESS.')
-
+                "The directory does not exist or you do not have permission to access it.")
     else:
-        # Handle the error
-        print("The directory does not exist or you do not have permission to access it.")
+        print("File type not supported.")
 
 
 def ScrambleMethodScramble():
