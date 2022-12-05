@@ -227,7 +227,12 @@ def zero_corrupt(packet, weight: float = 0.2, min_bits: int = 1, max_bits: int =
         else:
             new_byte = byte
         new_contents_list.append(new_byte)
-    return new_contents_list
+
+    # Create a Scapy packet from the scrambled packet data
+    new_contents = bytes(new_contents_list)
+    packet_length = len(new_contents_list)
+    new_packet = IP(new_contents, len=packet_length)
+    return new_packet
 
 
 def ScramblePackets(scrambling_method):
