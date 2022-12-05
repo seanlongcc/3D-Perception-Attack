@@ -2,7 +2,8 @@ import os
 import time
 import random
 from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtGui import QIntValidator
+from PyQt5.QtGui import QIntValidator, QFont
+from PyQt5.QtCore import Qt
 from scapy.all import *
 from scapy.layers.inet import IP
 
@@ -21,25 +22,39 @@ window.setWindowTitle('Packet Scrambler')
 # Create a layout for the window
 layout = QtWidgets.QVBoxLayout()
 
+# Set the font of the label
+font = QFont("Arial", 12)
+
+# Create a new label for the title
+title_label = QtWidgets.QLabel('Packet Scrambler')
+title_label.setFont(font)
+title_label.setAlignment(Qt.AlignCenter)
+layout.addWidget(title_label)
+
 # Create a text field for entering the directory
 directory_field = QtWidgets.QLineEdit()
 directory_field.setPlaceholderText('Enter path to file')
 layout.addWidget(directory_field)
 
+# Create a new label for the Optional settings
+options_label = QtWidgets.QLabel('Options')
+options_label.setAlignment(Qt.AlignCenter)
+layout.addWidget(options_label)
+
 # Create a text field for entering the file name
 file_name_field = QtWidgets.QLineEdit()
-file_name_field.setPlaceholderText('Enter output file name (optional)')
+file_name_field.setPlaceholderText('Enter output file name')
 layout.addWidget(file_name_field)
 
 # Create a text field for entering the corruption level
 corruption_field = QtWidgets.QLineEdit()
 corruption_field.setPlaceholderText(
-    'Enter corruption weight from 1-100 (optional)')
+    'Enter corruption weight from 1-100')
 
 # Create a text field for entering the corruption level
 proportion_field = QtWidgets.QLineEdit()
 proportion_field.setPlaceholderText(
-    'Enter proportion of packets to corrupt from 1%-100% (optional)')
+    'Enter proportion of packets to corrupt from 1%-100%')
 
 # Create an integer validator and set it on the text field with a range of 1-100
 validator = QIntValidator()
@@ -48,6 +63,11 @@ corruption_field.setValidator(validator)
 layout.addWidget(corruption_field)
 proportion_field.setValidator(validator)
 layout.addWidget(proportion_field)
+
+# Create a new label for the modes
+mode_label = QtWidgets.QLabel('Scramble Modes')
+mode_label.setAlignment(Qt.AlignCenter)
+layout.addWidget(mode_label)
 
 # Create a button for starting the packet scrambling
 scramble_button = QtWidgets.QPushButton('Scramble Packets')
@@ -64,6 +84,11 @@ layout.addWidget(one_button)
 # Create a button for starting the packet scrambling
 zero_button = QtWidgets.QPushButton('Zero Corrupt Packets')
 layout.addWidget(zero_button)
+
+# Create a new label for the Progress bar
+progress_label = QtWidgets.QLabel('Progress')
+progress_label.setAlignment(Qt.AlignCenter)
+layout.addWidget(progress_label)
 
 # Create a progress bar for displaying the progress percentage
 progress_bar = QtWidgets.QProgressBar()
