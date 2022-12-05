@@ -36,12 +36,18 @@ corruption_field = QtWidgets.QLineEdit()
 corruption_field.setPlaceholderText(
     'Enter corruption weight from 1-100 (optional)')
 
+# Create a text field for entering the corruption level
+proportion_field = QtWidgets.QLineEdit()
+proportion_field.setPlaceholderText(
+    'Enter proportion of packets to corrupt from 1-100% (optional)')
+
 # Create an integer validator and set it on the text field with a range of 1-100
 validator = QIntValidator()
 validator.setRange(1, 100)
 corruption_field.setValidator(validator)
 layout.addWidget(corruption_field)
-
+proportion_field.setValidator(validator)
+layout.addWidget(proportion_field)
 
 # Create a button for starting the packet scrambling
 scramble_button = QtWidgets.QPushButton('Scramble Packets')
@@ -88,10 +94,23 @@ def on_text_changed():
         # Move the cursor to the end of the text field
         cursor = corruption_field.cursorPosition()
         corruption_field.setCursorPosition(cursor)
+        
+    # Get the current text in the text field
+    text = proportion_field.text()
+
+    # Check if the text is a number greater than 100
+    if text.isdigit() and int(text) > 100:
+        # Set the text to 100 if it is greater than 100
+        proportion_field.setText("100")
+
+        # Move the cursor to the end of the text field
+        cursor = proportion_field.cursorPosition()
+        proportion_field.setCursorPosition(cursor)
 
 
 # Connect the textChanged signal to the custom slot
 corruption_field.textChanged.connect(on_text_changed)
+proportion_field.textChanged.connect(on_text_changed)
 
 
 def progressBar():
@@ -241,12 +260,15 @@ def ScramblePackets(scrambling_method):
     file_name = file_name_field.text()
 
     if directory.endswith('.pcap') or directory.endswith('.pcapng'):
-        # Sets a defualt weight
+        # Sets a default weight
         weight = .2
+        proportion = 1.0
 
         # Sets the custom weight
         if corruption_field.text() != '':
             weight = int(corruption_field.text()) * .01
+        if proportion_field.text() != '':
+            weight = int(proportion_field.text()) * .01
 
         if os.path.exists(directory) == True:
             # If no file name was entered, generate a unique file name using the current timestamp
@@ -278,7 +300,10 @@ def ScramblePackets(scrambling_method):
             scrambled_packets = []
 
             for packet in packets:
-                scrambled_packet = scrambling_method(packet, weight)
+                if random.random() <= proportion:
+                    scrambled_packet = scrambling_method(packet, weight)
+                else:
+                    scrambled_packet = packet
                 scrambled_packets.append(scrambled_packet)
                 # Increase counted file by one
                 count += 1
