@@ -142,13 +142,15 @@ def progressBar(directory):
     # Reset progress bar
     progress_bar.setValue(int(0))
     # Set Variables
-    all_packets = []
+    #all_packets = []
     count = 0
     # Iterate through each packet in the file and apply the scrambling algorithm
-    for packet in PcapReader(directory):
-        all_packets.append(packet)
-        count += 1
-    return count, all_packets
+    # # # start_time = time.time()
+    # # # for packet in PcapReader(directory):
+    # # #     all_packets.append(packet)
+    # # #     count += 1
+    # # # print(time.time() - start_time, "seconds")
+    return count#, all_packets
 
 
 def scrambling_algorithm(packet, weight):
@@ -278,6 +280,7 @@ def zero_corrupt(packet, weight: float = 0.2, min_bits: int = 1, max_bits: int =
 
 
 def ScramblePackets(scrambling_method):
+    start_time = time.time()
     # Get the directory and file name from the text fields
     directory = directory_field.text()
     file_name = file_name_field.text()
@@ -304,7 +307,7 @@ def ScramblePackets(scrambling_method):
                     file_name += '.pcapng'
 
             # Get the total number of packets
-            total_packets, all_packets = progressBar(directory)
+            #total_packets, all_packets = progressBar(directory)
 
             # Counter for progress bar
             count = 0
@@ -320,7 +323,8 @@ def ScramblePackets(scrambling_method):
             scrambled_packets = []
 
             # for packet in PcapReader(directory):
-            for packet in all_packets:
+
+            for packet in PcapReader(directory):
                 if random.random() <= proportion:
                     scrambled_packet = scrambling_method(packet, weight)
                 else:
@@ -328,6 +332,9 @@ def ScramblePackets(scrambling_method):
                 scrambled_packets.append(scrambled_packet)
                 # Increase counted file by one
                 count += 1
+                
+                #for testing
+                total_packets=count
 
                 # Calculate the current progress as a percentage
                 progress = (count + 1) / total_packets * 100
@@ -337,7 +344,7 @@ def ScramblePackets(scrambling_method):
 
             # Write the scrambled packets to a new PCAP file using Scapy's wrpcap function
             wrpcap(file_name, scrambled_packets)
-
+            print(time.time() - start_time, "seconds")
             # Print success message
             if scrambling_method != scrambling_algorithm:
                 print(
