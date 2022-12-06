@@ -138,19 +138,17 @@ corruption_field.textChanged.connect(on_text_changed)
 proportion_field.textChanged.connect(on_text_changed)
 
 
-def progressBar():
+def progressBar(directory):
     # Reset progress bar
     progress_bar.setValue(int(0))
-    # Get the directory
-    directory = directory_field.text()
+    # Set Variables
+    all_packets = []
     count = 0
-    # Read in the PCAP file using Scapy's rdpcap function
-    packets = rdpcap(directory)
     # Iterate through each packet in the file and apply the scrambling algorithm
-    for _ in packets:
+    for packet in PcapReader(directory):
+        all_packets.append(packet)
         count += 1
-
-    return count
+    return count, all_packets
 
 
 def scrambling_algorithm(packet, weight):
@@ -306,13 +304,10 @@ def ScramblePackets(scrambling_method):
                     file_name += '.pcapng'
 
             # Get the total number of packets
-            total_packets = progressBar()
+            total_packets, all_packets = progressBar(directory)
 
             # Counter for progress bar
             count = 0
-
-            # Read in the PCAP file using Scapy's rdpcap function
-            packets = rdpcap(directory)
 
             # Print out input values
             if scrambling_method != scrambling_algorithm:
@@ -324,7 +319,8 @@ def ScramblePackets(scrambling_method):
             # Iterate through each packet in the file and apply the scrambling algorithm
             scrambled_packets = []
 
-            for packet in packets:
+            # for packet in PcapReader(directory):
+            for packet in all_packets:
                 if random.random() <= proportion:
                     scrambled_packet = scrambling_method(packet, weight)
                 else:
