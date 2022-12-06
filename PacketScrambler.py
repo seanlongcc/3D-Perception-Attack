@@ -180,7 +180,7 @@ def scrambling_algorithm(packet, weight=0.2):
         if random.random() <= weight:
             scrambled_bytes += bytes([(byte + secret_key) % 256])
         else:
-            scrambled_bytes += byte
+            scrambled_bytes += bytes([byte])
 
     # Create a Scapy packet from the scrambled packet data
     packet_length = len(scrambled_bytes)
