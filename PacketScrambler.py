@@ -282,6 +282,7 @@ def ScramblePackets(scrambling_method):
             pcap_writer = dpkt.pcap.Writer(f)
 
             # Read pcap file iteratively using scapy Pcapreader
+            packet_counter = 1
             for packet in PcapReader(directory):
                 if random.random() <= proportion:
                     scrambled_packet = scrambling_method(packet)
@@ -290,6 +291,8 @@ def ScramblePackets(scrambling_method):
 
                 # Write the scrambled packets to a new PCAP file using dkpt
                 pcap_writer.writepkt(scrambled_packet)
+                if packet_counter % 1000 == 0: print("Wrote packet", packet_counter)
+                packet_counter += 1
 
         # get current time
         current_time = datetime.now().strftime("%H:%M:%S")
