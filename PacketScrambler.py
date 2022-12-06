@@ -1,3 +1,5 @@
+from scapy.all import Packet
+from numpy import bitwise_xor, bitwise_or, bitwise_and, left_shift
 import os
 import time
 import random
@@ -7,6 +9,7 @@ from PyQt5.QtGui import QIntValidator, QFont
 from PyQt5.QtCore import Qt
 from scapy.all import *
 from scapy.layers.inet import IP
+from datetime import datetime
 
 # Create a new PyQt5 application
 app = QtWidgets.QApplication([])
@@ -114,28 +117,41 @@ def on_text_changed():
 proportion_field.textChanged.connect(on_text_changed)
 
 
+# def scrambling_algorithm(packet):
+#     # Get the raw bytes of the packet
+#     packet_bytes = bytes(packet)
+
+#     # Perform the Caesar cipher on the packet bytes using a secret key
+#     secret_key = 5
+#     scrambled_bytes = bytearray()
+#     for byte in packet_bytes:
+#         scrambled_bytes.append((byte + secret_key) % 256)
+
+#     # Create a Scapy packet from the scrambled packet data
+#     packet_length = len(scrambled_bytes)
+#     scrambled_packet = IP(bytes(scrambled_bytes), len=packet_length)
+
+#     # Return the scrambled packet
+#     return scrambled_packet
 def scrambling_algorithm(packet):
     # Get the raw bytes of the packet
     packet_bytes = bytes(packet)
 
     # Perform the Caesar cipher on the packet bytes using a secret key
     secret_key = 5
-    scrambled_bytes = b''
-    for byte in packet_bytes:
-        scrambled_bytes += bytes([(byte + secret_key) % 256])
+    packet_bytes = [((byte + secret_key) & 255) for byte in packet_bytes]
 
     # Create a Scapy packet from the scrambled packet data
-    packet_length = len(scrambled_bytes)
-    scrambled_packet = IP(scrambled_bytes, len=packet_length)
+    packet_length = len(packet_bytes)
+    scrambled_packet = IP(bytes(packet_bytes), len=packet_length)
 
     # Return the scrambled packet
     return scrambled_packet
 
 
 def bitflip_corrupt(packet, min_bits: int = 1, max_bits: int = 8):
-    # flips bits with min/max bits to flip per byte
-    # convert packet to list for operations
-    contents_list = list(bytes(packet))
+    # convert packet to bytes for operations
+    contents = bytes(packet)
 
     # sanity checks
     if max_bits > 8:
@@ -146,27 +162,26 @@ def bitflip_corrupt(packet, min_bits: int = 1, max_bits: int = 8):
         raise ValueError()
 
     # bitflipping logic starts here
-    new_contents_list = []
-    for byte in contents_list:
+    new_contents = bytearray()
+    for byte in contents:
         # generate the bit-flipper byte
         bits = random.randint(min_bits, max_bits)
         flipped_bits = random.sample(range(8), bits)
-        flipper = sum([2**i for i in flipped_bits])
+        flipper = 0
+        for bit in flipped_bits:
+            flipper |= 1 << bit
         # xors flipper with original value
-        new_byte = byte ^ flipper
-        new_contents_list.append(new_byte)
+        new_contents.append(bitwise_xor(byte, flipper))
 
     # Create a Scapy packet from the scrambled packet data
-    new_contents = bytes(new_contents_list)
-    packet_length = len(new_contents_list)
-    new_packet = IP(new_contents, len=packet_length)
+    packet_length = len(new_contents)
+    new_packet = IP(bytes(new_contents), len=packet_length)
     return new_packet
 
 
 def one_corrupt(packet, min_bits: int = 1, max_bits: int = 8):
-    # flips bits with given min/max bits to flip per byte
-    # convert packet to list for operations
-    contents_list = list(bytes(packet))
+    # convert packet to bytes for operations
+    contents = bytes(packet)
 
     # sanity checks
     if max_bits > 8:
@@ -176,28 +191,27 @@ def one_corrupt(packet, min_bits: int = 1, max_bits: int = 8):
     if min_bits > max_bits:
         raise ValueError()
 
-    # bitflipping logic starts here
-    new_contents_list = []
-    for byte in contents_list:
-        # generate the bit-flipper byte
+    # one-corrupt logic starts here
+    new_contents = bytearray()
+    for byte in contents:
+        # generate the one-corrupt byte
         bits = random.randint(min_bits, max_bits)
-        oner_bits = random.sample(range(8), bits)
-        oner = sum([2**i for i in oner_bits])
-        # xors flipper with original value
-        new_byte = byte | oner
-        new_contents_list.append(new_byte)
+        one_corrupt_bits = random.sample(range(8), bits)
+        one_corruptor = 0
+        for bit in one_corrupt_bits:
+            one_corruptor |= 1 << bit
+        # ors one-corruptor with original value
+        new_contents.append(bitwise_or(byte, one_corruptor))
 
     # Create a Scapy packet from the scrambled packet data
-    new_contents = bytes(new_contents_list)
-    packet_length = len(new_contents_list)
-    new_packet = IP(new_contents, len=packet_length)
+    packet_length = len(new_contents)
+    new_packet = IP(bytes(new_contents), len=packet_length)
     return new_packet
 
 
 def zero_corrupt(packet, min_bits: int = 1, max_bits: int = 8):
-    # zeroes bits with min/max bits to zero per byte
-    # convert packet to list for operations
-    contents_list = list(bytes(packet))
+    # convert packet to bytes for operations
+    contents = bytes(packet)
 
     # sanity checks
     if max_bits > 8:
@@ -207,21 +221,21 @@ def zero_corrupt(packet, min_bits: int = 1, max_bits: int = 8):
     if min_bits > max_bits:
         raise ValueError()
 
-    # bitflipping logic starts here
-    new_contents_list = []
-    for byte in contents_list:
-        # generate the bit-zero byte
+    # zero-corrupt logic starts here
+    new_contents = bytearray()
+    for byte in contents:
+        # generate the zero-corrupt byte
         bits = random.randint(min_bits, max_bits)
-        zeroer_bits = random.sample(range(8), 8 - bits)
-        zeroer = sum([2**i for i in zeroer_bits])
-        # xors flipper with original value
-        new_byte = byte & zeroer
-        new_contents_list.append(new_byte)
+        zero_corrupt_bits = random.sample(range(8), 8 - bits)
+        zero_corruptor = 0
+        for bit in zero_corrupt_bits:
+            zero_corruptor |= 1 << bit
+        # ands zero-corruptor with original value
+        new_contents.append(bitwise_and(byte, zero_corruptor))
 
     # Create a Scapy packet from the scrambled packet data
-    new_contents = bytes(new_contents_list)
-    packet_length = len(new_contents_list)
-    new_packet = IP(new_contents, len=packet_length)
+    packet_length = len(new_contents)
+    new_packet = IP(bytes(new_contents), len=packet_length)
     return new_packet
 
 
@@ -230,58 +244,66 @@ def ScramblePackets(scrambling_method):
     directory = directory_field.text()
     file_name = file_name_field.text()
 
-    if directory.endswith('.pcap') or directory.endswith('.pcapng'):
-        # Sets a default proportion
-        proportion = .2
-
-        # Sets the custom proportion
-        if proportion_field.text() != '':
-            proportion = int(proportion_field.text()) * .01
-
-        if os.path.exists(directory) == True:
-            # If no file name was entered, generate a unique file name using the current timestamp
-            if not file_name:
-                timestamp = int(time.time())
-                file_name = f'{scrambling_method.__name__}_{timestamp}.pcapng'
-            else:
-                # Append '.pcapng' to the file name if it is not already present
-                if not file_name.endswith('.pcapng'):
-                    file_name += '.pcapng'
-
-            # start a timer
-            start_time = time.time()
-
-            # Print out input values
-            print(f'{scrambling_method.__name__} with proportion {int(proportion * 100)} started at {round(time.time() - start_time, 2)} seconds.')
-
-            # open the new file, file_name, to write to in bytes
-            with open(file_name, 'wb') as f:
-                # Create a dpkt.pcap.Writer object
-                pcap_writer = dpkt.pcap.Writer(f)
-
-                # Read pcap file iteratively using scapy Pcapreader
-                for packet in PcapReader(directory):
-                    if random.random() <= proportion:
-                        scrambled_packet = scrambling_method(packet)
-                    else:
-                        scrambled_packet = packet
-
-                    # Write the scrambled packets to a new PCAP file using dkpt
-                    pcap_writer.writepkt(scrambled_packet)
-
-           # Print success message
-            print(f'{scrambling_method.__name__} with proportion {int(proportion * 100)} SUCCESS in {round(time.time() - start_time, 2)} seconds.\n')
-
-            # Message box for success message
-            msg.exec_()
-
-        # Handle errors
-        else:
-            print(
-                "The file does not exist or you do not have permission to access it.")
-
+    # Check if the directory ends with '.pcap' or '.pcapng'
+    if directory.endswith('.pcap'):
+        file_type = 'pcap'
+    elif directory.endswith('.pcapng'):
+        file_type = 'pcapng'
     else:
         print("File type not supported.")
+        return
+
+    # Set the proportion to the value entered in the proportion_field text field, or to 0.2 if the text field is empty
+    proportion = int(proportion_field.text()
+                     ) * .01 if proportion_field.text() else 0.2
+
+    if os.path.exists(directory) == True:
+        # If no file name was entered, generate a unique file name using a UUID
+        if not file_name:
+            timestamp = int(time.time())
+            file_name = f'{scrambling_method.__name__}_{timestamp}.{file_type}'
+        else:
+            # Append the file type to the file name if it is not already present
+            if not file_name.endswith(file_type):
+                file_name += f'.{file_type}'
+
+        # start a timer
+        start_time = time.time()
+
+        # get current time
+        current_time = datetime.now().strftime("%H:%M:%S")
+
+        # Print out input values
+        print(
+            f'{scrambling_method.__name__} with proportion {int(proportion * 100)} started at {current_time}.')
+
+        # open the new file, file_name, to write to in bytes
+        with open(file_name, 'wb') as f:
+            # Create a dpkt.pcap.Writer object
+            pcap_writer = dpkt.pcap.Writer(f)
+
+            # Read pcap file iteratively using scapy Pcapreader
+            for packet in PcapReader(directory):
+                if random.random() <= proportion:
+                    scrambled_packet = scrambling_method(packet)
+                else:
+                    scrambled_packet = packet
+
+                # Write the scrambled packets to a new PCAP file using dkpt
+                pcap_writer.writepkt(scrambled_packet)
+
+        # get current time
+        current_time = datetime.now().strftime("%H:%M:%S")
+        # Print success message
+        print(f'{scrambling_method.__name__} with proportion {int(proportion * 100)} SUCCESS in {round(time.time() - start_time, 2)} seconds at {current_time}.\n')
+
+        # Message box for success message
+        msg.exec_()
+
+    # Handle errors
+    else:
+        print(
+            "The file does not exist or you do not have permission to access it.")
 
 
 def ScrambleMethodScramble():
