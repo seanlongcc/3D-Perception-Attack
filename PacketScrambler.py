@@ -122,6 +122,15 @@ def on_text_changed():
         cursor = corruption_field.cursorPosition()
         corruption_field.setCursorPosition(cursor)
 
+    # Check if the text is a number less than 1
+    if text.isdigit() and int(text) < 1:
+        # Set the text to 1 if it is less than 1
+        corruption_field.setText("1")
+
+        # Move the cursor to the end of the text field
+        cursor = corruption_field.cursorPosition()
+        corruption_field.setCursorPosition(cursor)
+
     # Get the current text in the text field
     text = proportion_field.text()
 
@@ -129,6 +138,15 @@ def on_text_changed():
     if text.isdigit() and int(text) > 100:
         # Set the text to 100 if it is greater than 100
         proportion_field.setText("100")
+
+        # Move the cursor to the end of the text field
+        cursor = proportion_field.cursorPosition()
+        proportion_field.setCursorPosition(cursor)
+
+    # Check if the text is a number less than 1
+    if text.isdigit() and int(text) < 1:
+        # Set the text to 1 if it is less than 1
+        proportion_field.setText("1")
 
         # Move the cursor to the end of the text field
         cursor = proportion_field.cursorPosition()
