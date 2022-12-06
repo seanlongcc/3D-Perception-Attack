@@ -318,8 +318,7 @@ def ScramblePackets(scrambling_method):
             wrpcap(file_name, scrambled_packets)
 
            # Print success message
-            print(f'{scrambling_method.__name__} with proportion {int(proportion * 100)} SUCCESS in {round(time.time() - start_time, 2)} seconds.')
-
+            print(f'{scrambling_method.__name__} with proportion {int(proportion * 100)} SUCCESS in {round(time.time() - start_time, 2)} seconds.\n')
             # free up the memory
             del scrambled_packets
             gc.collect()
