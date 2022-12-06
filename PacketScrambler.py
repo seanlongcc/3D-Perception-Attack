@@ -171,10 +171,10 @@ def one_corrupt(packet):
     packet_length = len(contents)
 
     # one-corrupt logic starts here
-    new_contents = [255 for _ in range(packet_length)]
+    new_contents = b'\xff' * packet_length
 
     # Create a Scapy packet from the scrambled packet data
-    new_packet = IP(bytes(new_contents), len=packet_length)
+    new_packet = IP(new_contents, len=packet_length)
     return new_packet
 
 
