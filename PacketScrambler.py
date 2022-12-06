@@ -1,5 +1,4 @@
-from scapy.all import Packet
-from numpy import bitwise_xor, bitwise_or, bitwise_and, left_shift
+from numpy import bitwise_xor, bitwise_or, bitwise_and
 import os
 import time
 import random
