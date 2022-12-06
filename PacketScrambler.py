@@ -148,28 +148,15 @@ def scrambling_algorithm(packet):
     return scrambled_packet
 
 
-def bitflip_corrupt(packet, min_bits: int = 1, max_bits: int = 8):
+def bitflip_corrupt(packet):
     # convert packet to bytes for operations
     contents = bytes(packet)
-
-    # sanity checks
-    if max_bits > 8:
-        raise ValueError()
-    if min_bits < 0:
-        raise ValueError()
-    if min_bits > max_bits:
-        raise ValueError()
 
     # bitflipping logic starts here
     new_contents = bytearray()
     for byte in contents:
         # generate the bit-flipper byte
-        bits = random.randint(min_bits, max_bits)
-        flipped_bits = random.sample(range(8), bits)
-        flipper = 0
-        for bit in flipped_bits:
-            flipper |= 1 << bit
-        # xors flipper with original value
+        flipper = 255
         new_contents.append(bitwise_xor(byte, flipper))
 
     # Create a Scapy packet from the scrambled packet data
@@ -178,32 +165,15 @@ def bitflip_corrupt(packet, min_bits: int = 1, max_bits: int = 8):
     return new_packet
 
 
-def one_corrupt(packet, min_bits: int = 1, max_bits: int = 8):
+def one_corrupt(packet):
     # convert packet to bytes for operations
     contents = bytes(packet)
-
-    # sanity checks
-    if max_bits > 8:
-        raise ValueError()
-    if min_bits < 0:
-        raise ValueError()
-    if min_bits > max_bits:
-        raise ValueError()
+    packet_length = len(contents)
 
     # one-corrupt logic starts here
-    new_contents = bytearray()
-    for byte in contents:
-        # generate the one-corrupt byte
-        bits = random.randint(min_bits, max_bits)
-        one_corrupt_bits = random.sample(range(8), bits)
-        one_corruptor = 0
-        for bit in one_corrupt_bits:
-            one_corruptor |= 1 << bit
-        # ors one-corruptor with original value
-        new_contents.append(bitwise_or(byte, one_corruptor))
+    new_contents = [255 for _ in range(packet_length)]
 
     # Create a Scapy packet from the scrambled packet data
-    packet_length = len(new_contents)
     new_packet = IP(bytes(new_contents), len=packet_length)
     return new_packet
 
