@@ -1,12 +1,12 @@
 import os
 import time
 import random
-from PyQt5 import QtWidgets, QtCore
+import dpkt
+from PyQt5 import QtWidgets
 from PyQt5.QtGui import QIntValidator, QFont
 from PyQt5.QtCore import Qt
 from scapy.all import *
 from scapy.layers.inet import IP
-import dpkt
 
 # Create a new PyQt5 application
 app = QtWidgets.QApplication([])
