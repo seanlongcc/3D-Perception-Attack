@@ -48,12 +48,7 @@ file_name_field = QtWidgets.QLineEdit()
 file_name_field.setPlaceholderText('Enter output file name')
 layout.addWidget(file_name_field)
 
-# Create a text field for entering the corruption level
-corruption_field = QtWidgets.QLineEdit()
-corruption_field.setPlaceholderText(
-    'Enter corruption weight from 0-100')
-
-# Create a text field for entering the corruption level
+# Create a text field for entering the proportion level
 proportion_field = QtWidgets.QLineEdit()
 proportion_field.setPlaceholderText(
     'Enter proportion of packets to corrupt from 0%-100%')
@@ -61,8 +56,6 @@ proportion_field.setPlaceholderText(
 # Create an integer validator and set it on the text field with a range of 1-100
 validator = QIntValidator()
 validator.setRange(0, 100)
-corruption_field.setValidator(validator)
-layout.addWidget(corruption_field)
 proportion_field.setValidator(validator)
 layout.addWidget(proportion_field)
 
@@ -111,27 +104,6 @@ progress_bar.setValue(int(0))
 
 def on_text_changed():
     # Get the current text in the text field
-    text = corruption_field.text()
-
-    # Check if the text is a number greater than 100
-    if text.isdigit() and int(text) > 100:
-        # Set the text to 100 if it is greater than 100
-        corruption_field.setText("100")
-
-        # Move the cursor to the end of the text field
-        cursor = corruption_field.cursorPosition()
-        corruption_field.setCursorPosition(cursor)
-
-    # Check if the text is a number less than 1
-    if text.isdigit() and int(text) < 0:
-        # Set the text to 1 if it is less than 1
-        corruption_field.setText("0")
-
-        # Move the cursor to the end of the text field
-        cursor = corruption_field.cursorPosition()
-        corruption_field.setCursorPosition(cursor)
-
-    # Get the current text in the text field
     text = proportion_field.text()
 
     # Check if the text is a number greater than 100
@@ -154,7 +126,6 @@ def on_text_changed():
 
 
 # Connect the textChanged signal to the custom slot
-corruption_field.textChanged.connect(on_text_changed)
 proportion_field.textChanged.connect(on_text_changed)
 
 
@@ -169,12 +140,12 @@ def progressBar(directory):
     return count
 
 
-def scrambling_algorithm(packet, weight=0.05):
+def scrambling_algorithm(packet):
     # Get the raw bytes of the packet
     packet_bytes = bytes(packet)
 
     # Perform the Caesar cipher on the packet bytes using a secret key
-    secret_key = int(weight*100)
+    secret_key = 5
     scrambled_bytes = b''
     for byte in packet_bytes:
         scrambled_bytes += bytes([(byte + secret_key) % 256])
@@ -187,8 +158,8 @@ def scrambling_algorithm(packet, weight=0.05):
     return scrambled_packet
 
 
-def bitflip_corrupt(packet, weight=0.2, min_bits: int = 1, max_bits: int = 8):
-    # flips bits with given probability weight per byte and min/max bits to flip per byte
+def bitflip_corrupt(packet, min_bits: int = 1, max_bits: int = 8):
+    # flips bits with min/max bits to flip per byte
     # convert packet to list for operations
     contents_list = list(bytes(packet))
 
@@ -198,8 +169,6 @@ def bitflip_corrupt(packet, weight=0.2, min_bits: int = 1, max_bits: int = 8):
     if min_bits < 0:
         raise ValueError()
     if min_bits > max_bits:
-        raise ValueError()
-    if (weight < 0) or (weight > 1):
         raise ValueError()
 
     # bitflipping logic starts here
@@ -220,8 +189,8 @@ def bitflip_corrupt(packet, weight=0.2, min_bits: int = 1, max_bits: int = 8):
     return new_packet
 
 
-def one_corrupt(packet, weight: float = 0.2, min_bits: int = 1, max_bits: int = 8):
-    # flips bits with given probability weight per byte and min/max bits to flip per byte
+def one_corrupt(packet, min_bits: int = 1, max_bits: int = 8):
+    # flips bits with given min/max bits to flip per byte
     # convert packet to list for operations
     contents_list = list(bytes(packet))
 
@@ -231,8 +200,6 @@ def one_corrupt(packet, weight: float = 0.2, min_bits: int = 1, max_bits: int = 
     if min_bits < 0:
         raise ValueError()
     if min_bits > max_bits:
-        raise ValueError()
-    if (weight < 0) or (weight > 1):
         raise ValueError()
 
     # bitflipping logic starts here
@@ -253,8 +220,8 @@ def one_corrupt(packet, weight: float = 0.2, min_bits: int = 1, max_bits: int = 
     return new_packet
 
 
-def zero_corrupt(packet, weight: float = 0.2, min_bits: int = 1, max_bits: int = 8):
-    # zeroes bits with given probability weight per byte and min/max bits to zero per byte
+def zero_corrupt(packet, min_bits: int = 1, max_bits: int = 8):
+    # zeroes bits with min/max bits to zero per byte
     # convert packet to list for operations
     contents_list = list(bytes(packet))
 
@@ -264,8 +231,6 @@ def zero_corrupt(packet, weight: float = 0.2, min_bits: int = 1, max_bits: int =
     if min_bits < 0:
         raise ValueError()
     if min_bits > max_bits:
-        raise ValueError()
-    if (weight < 0) or (weight > 1):
         raise ValueError()
 
     # bitflipping logic starts here
@@ -298,19 +263,16 @@ def progressBarUpdate(count=0, total_packets=1):
     return count
 
 
-def ScramblePackets(scrambling_method=None):
+def ScramblePackets(scrambling_method):
     # Get the directory and file name from the text fields
     directory = directory_field.text()
     file_name = file_name_field.text()
 
     if directory.endswith('.pcap') or directory.endswith('.pcapng'):
-        # Sets a default weight and proportion
-        weight = .2
+        # Sets a default proportion
         proportion = .2
 
-        # Sets the custom weight
-        if corruption_field.text() != '':
-            weight = int(corruption_field.text()) * .01
+        # Sets the custom proportion
         if proportion_field.text() != '':
             proportion = int(proportion_field.text()) * .01
 
@@ -328,18 +290,15 @@ def ScramblePackets(scrambling_method=None):
             start_time = time.time()
 
             # Get the total number of packets
+            print(
+                f"Parsing packets started at {round(time.time() - start_time, 2)}.")
             total_packets = progressBar(directory)
 
             # Counter for progress bar
             count = 0
 
             # Print out input values
-            if scrambling_method != scrambling_algorithm:
-                print(
-                    f'{scrambling_method.__name__} with weight {int(weight * 100)} and proportion {int(proportion * 100)} started in {round(time.time() - start_time, 2)} seconds.')
-            else:
-                print(
-                    f'{scrambling_method.__name__} with proportion {int(proportion * 100)} started in {round(time.time() - start_time, 2)} seconds.')
+            print(f'{scrambling_method.__name__} with proportion {int(proportion * 100)} started at {round(time.time() - start_time, 2)} seconds.')
 
             # Iterate through each packet in the file and apply the scrambling algorithm
             scrambled_packets = []
@@ -347,23 +306,19 @@ def ScramblePackets(scrambling_method=None):
             # for packet in PcapReader(directory):
             for packet in PcapReader(directory):
                 if random.random() <= proportion:
-                    scrambled_packet = scrambling_method(packet, weight)
+                    scrambled_packet = scrambling_method(packet)
                 else:
                     scrambled_packet = packet
                 scrambled_packets.append(scrambled_packet)
                 count = progressBarUpdate(count, total_packets)
 
             # Write the scrambled packets to a new PCAP file using Scapy's wrpcap function
+            print(
+                f'Writing to file started at {round(time.time() - start_time, 2)}.')
             wrpcap(file_name, scrambled_packets)
 
            # Print success message
-            if scrambling_method != scrambling_algorithm:
-                print(
-                    f'{scrambling_method.__name__} with weight {int(weight * 100)} and proportion {int(proportion * 100)} SUCCESS in {round(time.time() - start_time, 2)} seconds.')
-
-            else:
-                print(
-                    f'{scrambling_method.__name__} with proportion {int(proportion * 100)} SUCCESS in {round(time.time() - start_time, 2)} seconds.')
+            print(f'{scrambling_method.__name__} with proportion {int(proportion * 100)} SUCCESS in {round(time.time() - start_time, 2)} seconds.')
 
             # free up the memory
             del scrambled_packets
