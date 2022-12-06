@@ -169,7 +169,7 @@ def progressBar(directory):
     return count
 
 
-def scrambling_algorithm(packet, weight=0.2):
+def scrambling_algorithm(packet, weight=0.05):
     # Get the raw bytes of the packet
     packet_bytes = bytes(packet)
 
@@ -177,10 +177,7 @@ def scrambling_algorithm(packet, weight=0.2):
     secret_key = int(weight*100)
     scrambled_bytes = b''
     for byte in packet_bytes:
-        if random.random() <= weight:
-            scrambled_bytes += bytes([(byte + secret_key) % 256])
-        else:
-            scrambled_bytes += bytes([byte])
+        scrambled_bytes += bytes([(byte + secret_key) % 256])
 
     # Create a Scapy packet from the scrambled packet data
     packet_length = len(scrambled_bytes)
@@ -346,7 +343,12 @@ def ScramblePackets(scrambling_method=None):
             count = 0
 
             # Print out input values
-            print(f'{scrambling_method.__name__} with weight {int(weight * 100)} and proportion {int(proportion * 100)} started in {round(time.time() - start_time, 2)} seconds.')
+            if scrambling_method != scrambling_algorithm:
+                print(
+                    f'{scrambling_method.__name__} with weight {int(weight * 100)} and proportion {int(proportion * 100)} started in {round(time.time() - start_time, 2)} seconds.')
+            else:
+                print(
+                    f'{scrambling_method.__name__} with proportion {int(proportion * 100)} started in {round(time.time() - start_time, 2)} seconds.')
 
             # Iterate through each packet in the file and apply the scrambling algorithm
             scrambled_packets = []
@@ -363,8 +365,14 @@ def ScramblePackets(scrambling_method=None):
             # Write the scrambled packets to a new PCAP file using Scapy's wrpcap function
             wrpcap(file_name, scrambled_packets)
 
-            # Print success message
-            print(f'{scrambling_method.__name__} with weight {int(weight * 100)} and proportion {int(proportion * 100)} SUCCESS in {round(time.time() - start_time, 2)} seconds.')
+           # Print success message
+            if scrambling_method != scrambling_algorithm:
+                print(
+                    f'{scrambling_method.__name__} with weight {int(weight * 100)} and proportion {int(proportion * 100)} SUCCESS in {round(time.time() - start_time, 2)} seconds.')
+
+            else:
+                print(
+                    f'{scrambling_method.__name__} with proportion {int(proportion * 100)} SUCCESS in {round(time.time() - start_time, 2)} seconds.')
 
             # free up the memory
             del scrambled_packets
