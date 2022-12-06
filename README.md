@@ -11,19 +11,24 @@
 ## Hasan
 
 ## John
+
 - Developed initial program
 - Developed and tested various algorithms
 - Bug testing
-- Added corruption proportion
+- Added three corruption algorithms
+  - bitflip_corrupt
+  - zero_corrupt
+  - one_corrupt
 - Miscellaneous code breaking and fixing changes
 
 ## Sean
 
 - Developed initial scrambling algorithm
-- Multithreading for progress bar
 - General bug fixes
 - Worked on program efficiency
+  - Multithreading for progress bar
   - Garbage collection
+  - Using dpkt library to improve speed by 3x
 - Worked on debugging other scrambling methods
   - bitflip_corrupt
   - zero_corrupt

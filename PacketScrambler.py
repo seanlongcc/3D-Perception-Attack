@@ -6,8 +6,7 @@ from PyQt5.QtGui import QIntValidator, QFont
 from PyQt5.QtCore import Qt
 from scapy.all import *
 from scapy.layers.inet import IP
-import threading
-import gc
+import dpkt
 
 # Create a new PyQt5 application
 app = QtWidgets.QApplication([])
@@ -80,26 +79,12 @@ layout.addWidget(one_button)
 zero_button = QtWidgets.QPushButton('Zero Corrupt Packets')
 layout.addWidget(zero_button)
 
-# Create a new label for the Progress bar
-progress_label = QtWidgets.QLabel('Progress')
-progress_label.setAlignment(Qt.AlignCenter)
-layout.addWidget(progress_label)
+# Create a QMessageBox object
+msg = QtWidgets.QMessageBox()
 
-# Create a progress bar for displaying the progress percentage
-progress_bar = QtWidgets.QProgressBar()
-
-# Set the minimum and maximum values for the progress bar
-progress_bar.setMinimum(0)
-progress_bar.setMaximum(100)
-
-# Set the text format for displaying the progress percentage
-# he '%v' placeholder will be replaced with the current progress value
-progress_bar.setFormat('%v%')
-layout.addWidget(progress_bar)
-
-# Set the text to be visible inside the progress bar and set it to 0%
-progress_bar.setAlignment(QtCore.Qt.AlignCenter)
-progress_bar.setValue(int(0))
+# Set the message and the icon
+msg.setText("Scrambling SUCCESS")
+msg.setIcon(msg.Information)
 
 
 def on_text_changed():
@@ -127,17 +112,6 @@ def on_text_changed():
 
 # Connect the textChanged signal to the custom slot
 proportion_field.textChanged.connect(on_text_changed)
-
-
-def progressBar(directory):
-    # Reset progress bar
-    progress_bar.setValue(int(0))
-    # Set Variables
-    count = 0
-    # Iterate through each packet in the file and apply the scrambling algorithm
-    for _ in PcapReader(directory):
-        count += 1
-    return count
 
 
 def scrambling_algorithm(packet):
@@ -251,18 +225,6 @@ def zero_corrupt(packet, min_bits: int = 1, max_bits: int = 8):
     return new_packet
 
 
-def progressBarUpdate(count=0, total_packets=1):
-    # Increase counted file by one
-    count += 1
-
-    # Calculate the current progress as a percentage
-    progress = (count + 1) / total_packets * 100
-
-    # Convert the progress value to an integer before setting it on the progress bar
-    progress_bar.setValue(int(progress))
-    return count
-
-
 def ScramblePackets(scrambling_method):
     # Get the directory and file name from the text fields
     directory = directory_field.text()
@@ -289,44 +251,32 @@ def ScramblePackets(scrambling_method):
             # start a timer
             start_time = time.time()
 
-            # Get the total number of packets
-            print(
-                f"Parsing packets started at {round(time.time() - start_time, 2)}.")
-            total_packets = progressBar(directory)
-
-            # Counter for progress bar
-            count = 0
-
             # Print out input values
             print(f'{scrambling_method.__name__} with proportion {int(proportion * 100)} started at {round(time.time() - start_time, 2)} seconds.')
 
-            # Iterate through each packet in the file and apply the scrambling algorithm
-            scrambled_packets = []
+            # open the new file, file_name, to write to
+            with open(file_name, 'wb') as f:
+                # Create a dpkt.pcap.Writer object
+                pcap_writer = dpkt.pcap.Writer(f)
 
-            # for packet in PcapReader(directory):
-            for packet in PcapReader(directory):
-                if random.random() <= proportion:
-                    scrambled_packet = scrambling_method(packet)
-                else:
-                    scrambled_packet = packet
-                scrambled_packets.append(scrambled_packet)
-                count = progressBarUpdate(count, total_packets)
+                # for packet in PcapReader(directory):
+                for packet in PcapReader(directory):
+                    if random.random() <= proportion:
+                        scrambled_packet = scrambling_method(packet)
+                    else:
+                        scrambled_packet = packet
 
-            # Write the scrambled packets to a new PCAP file using Scapy's wrpcap function
-            print(
-                f'Writing to file started at {round(time.time() - start_time, 2)}.')
-            wrpcap(file_name, scrambled_packets)
+                    # Write the scrambled packets to a new PCAP file using dkpt
+                    pcap_writer.writepkt(scrambled_packet)
 
            # Print success message
             print(f'{scrambling_method.__name__} with proportion {int(proportion * 100)} SUCCESS in {round(time.time() - start_time, 2)} seconds.\n')
-            # free up the memory
-            del scrambled_packets
-            gc.collect()
+            msg.exec_()
 
+        # Handle errors
         else:
-            # Handle the error
             print(
-                "The directory does not exist or you do not have permission to access it.")
+                "The file does not exist or you do not have permission to access it.")
 
     else:
         print("File type not supported.")
@@ -347,10 +297,6 @@ def ScrambleMethodOne():
 def ScrambleMethodZero():
     ScramblePackets(zero_corrupt)
 
-
-# start another thread for the progress bar, set to daemon so that it stops when the window closes
-progressThread = threading.Thread(target=progressBarUpdate, daemon=True)
-progressThread.start()
 
 # Connect the 'clicked' signal of the a to the ScramblePackets function
 scramble_button.clicked.connect(ScrambleMethodScramble)
