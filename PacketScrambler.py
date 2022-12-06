@@ -270,11 +270,12 @@ def ScramblePackets(scrambling_method):
         start_time = time.time()
 
         # get current time
-        current_time = datetime.now().strftime("%H:%M:%S")
+        def current_time():
+            return datetime.now().strftime("%H:%M:%S")
 
         # Print out input values
         print(
-            f'{scrambling_method.__name__} with proportion {int(proportion * 100)} started at {current_time}.')
+            f'{scrambling_method.__name__} with proportion {int(proportion * 100)} started at {current_time()}.')
 
         # open the new file, file_name, to write to in bytes
         with open(file_name, 'wb') as f:
@@ -291,13 +292,11 @@ def ScramblePackets(scrambling_method):
 
                 # Write the scrambled packets to a new PCAP file using dkpt
                 pcap_writer.writepkt(scrambled_packet)
-                if packet_counter % 1000 == 0: print("Wrote packet", packet_counter)
+                if packet_counter % 1000 == 0: print("Wrote packet", packet_counter, "at", current_time())
                 packet_counter += 1
 
-        # get current time
-        current_time = datetime.now().strftime("%H:%M:%S")
         # Print success message
-        print(f'{scrambling_method.__name__} with proportion {int(proportion * 100)} SUCCESS in {round(time.time() - start_time, 2)} seconds at {current_time}.\n')
+        print(f'{scrambling_method.__name__} with proportion {int(proportion * 100)} SUCCESS in {round(time.time() - start_time, 2)} seconds at {current_time()}.\n')
 
         # Message box for success message
         msg.exec_()
