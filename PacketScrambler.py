@@ -330,7 +330,7 @@ def ScramblePackets(scrambling_method=None):
                     f'{scrambling_method.__name__} with weight {int(weight * 100)} and proportion {int(proportion * 100)} started in {round(time.time() - start_time, 2)} seconds.')
             else:
                 print(
-                    f'{scrambling_method.__name__} started in {round(time.time() - start_time, 2)} seconds.')
+                    f'{scrambling_method.__name__} with proportion {int(proportion * 100)} started in {round(time.time() - start_time, 2)} seconds.')
 
             # Iterate through each packet in the file and apply the scrambling algorithm
             scrambled_packets = []
@@ -354,7 +354,7 @@ def ScramblePackets(scrambling_method=None):
 
             else:
                 print(
-                    f'{scrambling_method.__name__} SUCCESS in {round(time.time() - start_time, 2)} seconds.')
+                    f'{scrambling_method.__name__} with proportion {int(proportion * 100)} SUCCESS in {round(time.time() - start_time, 2)} seconds.')
 
             # free up the memory
             del scrambled_packets
