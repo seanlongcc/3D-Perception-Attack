@@ -51,16 +51,16 @@ layout.addWidget(file_name_field)
 # Create a text field for entering the corruption level
 corruption_field = QtWidgets.QLineEdit()
 corruption_field.setPlaceholderText(
-    'Enter corruption weight from 1-100')
+    'Enter corruption weight from 0-100')
 
 # Create a text field for entering the corruption level
 proportion_field = QtWidgets.QLineEdit()
 proportion_field.setPlaceholderText(
-    'Enter proportion of packets to corrupt from 1%-100%')
+    'Enter proportion of packets to corrupt from 0%-100%')
 
 # Create an integer validator and set it on the text field with a range of 1-100
 validator = QIntValidator()
-validator.setRange(1, 100)
+validator.setRange(0, 100)
 corruption_field.setValidator(validator)
 layout.addWidget(corruption_field)
 proportion_field.setValidator(validator)
@@ -123,9 +123,9 @@ def on_text_changed():
         corruption_field.setCursorPosition(cursor)
 
     # Check if the text is a number less than 1
-    if text.isdigit() and int(text) < 1:
+    if text.isdigit() and int(text) < 0:
         # Set the text to 1 if it is less than 1
-        corruption_field.setText("1")
+        corruption_field.setText("0")
 
         # Move the cursor to the end of the text field
         cursor = corruption_field.cursorPosition()
@@ -144,9 +144,9 @@ def on_text_changed():
         proportion_field.setCursorPosition(cursor)
 
     # Check if the text is a number less than 1
-    if text.isdigit() and int(text) < 1:
+    if text.isdigit() and int(text) < 0:
         # Set the text to 1 if it is less than 1
-        proportion_field.setText("1")
+        proportion_field.setText("0")
 
         # Move the cursor to the end of the text field
         cursor = proportion_field.cursorPosition()
@@ -202,7 +202,7 @@ def bitflip_corrupt(packet, weight=0.2, min_bits: int = 1, max_bits: int = 8):
         raise ValueError()
     if min_bits > max_bits:
         raise ValueError()
-    if (weight <= 0) or (weight > 1):
+    if (weight < 0) or (weight > 1):
         raise ValueError()
 
     # bitflipping logic starts here
@@ -238,7 +238,7 @@ def one_corrupt(packet, weight: float = 0.2, min_bits: int = 1, max_bits: int = 
         raise ValueError()
     if min_bits > max_bits:
         raise ValueError()
-    if (weight <= 0) or (weight > 1):
+    if (weight < 0) or (weight > 1):
         raise ValueError()
 
     # bitflipping logic starts here
@@ -274,7 +274,7 @@ def zero_corrupt(packet, weight: float = 0.2, min_bits: int = 1, max_bits: int =
         raise ValueError()
     if min_bits > max_bits:
         raise ValueError()
-    if (weight <= 0) or (weight > 1):
+    if (weight < 0) or (weight > 1):
         raise ValueError()
 
     # bitflipping logic starts here
