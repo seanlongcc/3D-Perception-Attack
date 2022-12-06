@@ -116,33 +116,19 @@ def on_text_changed():
 proportion_field.textChanged.connect(on_text_changed)
 
 
-# def scrambling_algorithm(packet):
-#     # Get the raw bytes of the packet
-#     packet_bytes = bytes(packet)
-
-#     # Perform the Caesar cipher on the packet bytes using a secret key
-#     secret_key = 5
-#     scrambled_bytes = bytearray()
-#     for byte in packet_bytes:
-#         scrambled_bytes.append((byte + secret_key) % 256)
-
-#     # Create a Scapy packet from the scrambled packet data
-#     packet_length = len(scrambled_bytes)
-#     scrambled_packet = IP(bytes(scrambled_bytes), len=packet_length)
-
-#     # Return the scrambled packet
-#     return scrambled_packet
 def scrambling_algorithm(packet):
     # Get the raw bytes of the packet
     packet_bytes = bytes(packet)
 
     # Perform the Caesar cipher on the packet bytes using a secret key
     secret_key = 5
-    packet_bytes = [((byte + secret_key) & 255) for byte in packet_bytes]
+    scrambled_bytes = bytearray()
+    for byte in packet_bytes:
+        scrambled_bytes.append((byte + secret_key) % 256)
 
     # Create a Scapy packet from the scrambled packet data
-    packet_length = len(packet_bytes)
-    scrambled_packet = IP(bytes(packet_bytes), len=packet_length)
+    packet_length = len(scrambled_bytes)
+    scrambled_packet = IP(bytes(scrambled_bytes), len=packet_length)
 
     # Return the scrambled packet
     return scrambled_packet
@@ -262,7 +248,8 @@ def ScramblePackets(scrambling_method):
 
                 # Write the scrambled packets to a new PCAP file using dkpt
                 pcap_writer.writepkt(scrambled_packet)
-                if packet_counter % 1000 == 0: print("Wrote packet", packet_counter, "at", current_time())
+                if packet_counter % 1000 == 0:
+                    print("Wrote packet", packet_counter, "at", current_time())
                 packet_counter += 1
 
         # Print success message
