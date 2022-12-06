@@ -11,6 +11,11 @@
 ## Hasan
 
 ## John
+- Developed initial program
+- Developed and tested various algorithms
+- Bug testing
+- Added corruption proportion
+- Miscellaneous code breaking and fixing changes
 
 ## Sean
 
