@@ -110,7 +110,7 @@ def on_text_changed():
         proportion_field.setCursorPosition(cursor)
 
 
-# Connect the textChanged signal to the custom slot
+# Connect the textChanged signal to the proportion field
 proportion_field.textChanged.connect(on_text_changed)
 
 
@@ -254,12 +254,12 @@ def ScramblePackets(scrambling_method):
             # Print out input values
             print(f'{scrambling_method.__name__} with proportion {int(proportion * 100)} started at {round(time.time() - start_time, 2)} seconds.')
 
-            # open the new file, file_name, to write to
+            # open the new file, file_name, to write to in bytes
             with open(file_name, 'wb') as f:
                 # Create a dpkt.pcap.Writer object
                 pcap_writer = dpkt.pcap.Writer(f)
 
-                # for packet in PcapReader(directory):
+                # Read pcap file iteratively using scapy Pcapreader
                 for packet in PcapReader(directory):
                     if random.random() <= proportion:
                         scrambled_packet = scrambling_method(packet)
@@ -271,6 +271,8 @@ def ScramblePackets(scrambling_method):
 
            # Print success message
             print(f'{scrambling_method.__name__} with proportion {int(proportion * 100)} SUCCESS in {round(time.time() - start_time, 2)} seconds.\n')
+
+            # Message box for success message
             msg.exec_()
 
         # Handle errors
@@ -298,7 +300,7 @@ def ScrambleMethodZero():
     ScramblePackets(zero_corrupt)
 
 
-# Connect the 'clicked' signal of the a to the ScramblePackets function
+# Connect the 'clicked' signal to the ScramblePackets function
 scramble_button.clicked.connect(ScrambleMethodScramble)
 bitflip_button.clicked.connect(ScrambleMethodBitFlip)
 one_button.clicked.connect(ScrambleMethodOne)
