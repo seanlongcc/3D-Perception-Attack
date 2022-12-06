@@ -169,7 +169,7 @@ def progressBar(directory):
     return count
 
 
-def scrambling_algorithm(packet, weight):
+def scrambling_algorithm(packet, weight=0.2):
     # Get the raw bytes of the packet
     packet_bytes = bytes(packet)
 
@@ -177,7 +177,10 @@ def scrambling_algorithm(packet, weight):
     secret_key = 5
     scrambled_bytes = b''
     for byte in packet_bytes:
-        scrambled_bytes += bytes([(byte + secret_key) % 256])
+        if random.random() <= weight:
+            scrambled_bytes += bytes([(byte + secret_key) % 256])
+        else:
+            scrambled_bytes += byte
 
     # Create a Scapy packet from the scrambled packet data
     packet_length = len(scrambled_bytes)
