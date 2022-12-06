@@ -174,7 +174,7 @@ def scrambling_algorithm(packet, weight=0.2):
     packet_bytes = bytes(packet)
 
     # Perform the Caesar cipher on the packet bytes using a secret key
-    secret_key = 5
+    secret_key = int(weight*100)
     scrambled_bytes = b''
     for byte in packet_bytes:
         if random.random() <= weight:
@@ -346,12 +346,7 @@ def ScramblePackets(scrambling_method=None):
             count = 0
 
             # Print out input values
-            if scrambling_method != scrambling_algorithm:
-                print(
-                    f'{scrambling_method.__name__} with weight {int(weight * 100)} and proportion {int(proportion * 100)} started in {round(time.time() - start_time, 2)} seconds.')
-            else:
-                print(
-                    f'{scrambling_method.__name__} with proportion {int(proportion * 100)} started in {round(time.time() - start_time, 2)} seconds.')
+            print(f'{scrambling_method.__name__} with weight {int(weight * 100)} and proportion {int(proportion * 100)} started in {round(time.time() - start_time, 2)} seconds.')
 
             # Iterate through each packet in the file and apply the scrambling algorithm
             scrambled_packets = []
@@ -369,13 +364,7 @@ def ScramblePackets(scrambling_method=None):
             wrpcap(file_name, scrambled_packets)
 
             # Print success message
-            if scrambling_method != scrambling_algorithm:
-                print(
-                    f'{scrambling_method.__name__} with weight {int(weight * 100)} and proportion {int(proportion * 100)} SUCCESS in {round(time.time() - start_time, 2)} seconds.')
-
-            else:
-                print(
-                    f'{scrambling_method.__name__} with proportion {int(proportion * 100)} SUCCESS in {round(time.time() - start_time, 2)} seconds.')
+            print(f'{scrambling_method.__name__} with weight {int(weight * 100)} and proportion {int(proportion * 100)} SUCCESS in {round(time.time() - start_time, 2)} seconds.')
 
             # free up the memory
             del scrambled_packets
