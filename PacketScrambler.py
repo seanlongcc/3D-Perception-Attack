@@ -205,15 +205,12 @@ def bitflip_corrupt(packet, weight=0.2, min_bits: int = 1, max_bits: int = 8):
     # bitflipping logic starts here
     new_contents_list = []
     for byte in contents_list:
-        if random.random() <= weight:
-            # generate the bit-flipper byte
-            bits = random.randint(min_bits, max_bits)
-            flipped_bits = random.sample(range(8), bits)
-            flipper = sum([2**i for i in flipped_bits])
-            # xors flipper with original value
-            new_byte = byte ^ flipper
-        else:
-            new_byte = byte
+        # generate the bit-flipper byte
+        bits = random.randint(min_bits, max_bits)
+        flipped_bits = random.sample(range(8), bits)
+        flipper = sum([2**i for i in flipped_bits])
+        # xors flipper with original value
+        new_byte = byte ^ flipper
         new_contents_list.append(new_byte)
 
     # Create a Scapy packet from the scrambled packet data
@@ -241,15 +238,12 @@ def one_corrupt(packet, weight: float = 0.2, min_bits: int = 1, max_bits: int = 
     # bitflipping logic starts here
     new_contents_list = []
     for byte in contents_list:
-        if random.random() <= weight:
-            # generate the bit-flipper byte
-            bits = random.randint(min_bits, max_bits)
-            oner_bits = random.sample(range(8), bits)
-            oner = sum([2**i for i in oner_bits])
-            # xors flipper with original value
-            new_byte = byte | oner
-        else:
-            new_byte = byte
+        # generate the bit-flipper byte
+        bits = random.randint(min_bits, max_bits)
+        oner_bits = random.sample(range(8), bits)
+        oner = sum([2**i for i in oner_bits])
+        # xors flipper with original value
+        new_byte = byte | oner
         new_contents_list.append(new_byte)
 
     # Create a Scapy packet from the scrambled packet data
@@ -277,15 +271,12 @@ def zero_corrupt(packet, weight: float = 0.2, min_bits: int = 1, max_bits: int =
     # bitflipping logic starts here
     new_contents_list = []
     for byte in contents_list:
-        if random.random() <= weight:
-            # generate the bit-zero byte
-            bits = random.randint(min_bits, max_bits)
-            zeroer_bits = random.sample(range(8), 8 - bits)
-            zeroer = sum([2**i for i in zeroer_bits])
-            # xors flipper with original value
-            new_byte = byte & zeroer
-        else:
-            new_byte = byte
+        # generate the bit-zero byte
+        bits = random.randint(min_bits, max_bits)
+        zeroer_bits = random.sample(range(8), 8 - bits)
+        zeroer = sum([2**i for i in zeroer_bits])
+        # xors flipper with original value
+        new_byte = byte & zeroer
         new_contents_list.append(new_byte)
 
     # Create a Scapy packet from the scrambled packet data
