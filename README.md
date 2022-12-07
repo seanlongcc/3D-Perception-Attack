@@ -5,7 +5,7 @@
 - Minor commit to include random functions
 - Quality assurance and code testing
 - Logic checking with team members
-- Removed Code testing
+- Independent Removed Code Testing
 - Code was mostly done with other team members
   - Minor bug fixes
 
