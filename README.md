@@ -10,6 +10,8 @@
 
 ## Hasan
 
+- Made code more efficient
+
 ## John
 
 - Developed initial program
