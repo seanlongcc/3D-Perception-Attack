@@ -10,7 +10,13 @@
 
 ## Hasan
 
-- Made code more efficient
+- Efficiency improvements made on testing1 branch
+  - Progress bar efficiency improvements
+  - File reading efficiency improvements
+  - Added time as a measurement in efficiency
+- Tested code with multiple different PCAPs
+- Method brainstorming and minor bug fixing
+
 
 ## John
 
