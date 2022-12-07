@@ -135,13 +135,13 @@ def scrambling_algorithm(packet):
 
 
 def bitflip_corrupt(packet):
-    # convert packet to bytes for operations
+    # Convert packet to bytes for operations
     contents = bytes(packet)
 
-    # bitflipping logic starts here
+    # Bitflipping logic starts here
     new_contents = bytearray()
     for byte in contents:
-        # generate the bit-flipper byte
+        # Generate the bit-flipper byte
         flipper = 255
         new_contents.append(bitwise_xor(byte, flipper))
 
@@ -152,11 +152,11 @@ def bitflip_corrupt(packet):
 
 
 def one_corrupt(packet):
-    # convert packet to bytes for operations
+    # Convert packet to bytes for operations
     contents = bytes(packet)
     packet_length = len(contents)
 
-    # one-corrupt logic starts here
+    # One-corrupt logic starts here
     new_contents = b'\xff' * packet_length
 
     # Create a Scapy packet from the scrambled packet data
@@ -165,10 +165,10 @@ def one_corrupt(packet):
 
 
 def zero_corrupt(packet, min_bits: int = 1, max_bits: int = 8):
-    # convert packet to bytes for operations
+    # Convert packet to bytes for operations
     contents = bytes(packet)
 
-    # sanity checks
+    # Sanity checks
     if max_bits > 8:
         raise ValueError()
     if min_bits < 0:
@@ -176,16 +176,16 @@ def zero_corrupt(packet, min_bits: int = 1, max_bits: int = 8):
     if min_bits > max_bits:
         raise ValueError()
 
-    # zero-corrupt logic starts here
+    # Zero-corrupt logic starts here
     new_contents = bytearray()
     for byte in contents:
-        # generate the zero-corrupt byte
+        # Generate the zero-corrupt byte
         bits = random.randint(min_bits, max_bits)
         zero_corrupt_bits = random.sample(range(8), 8 - bits)
         zero_corruptor = 0
         for bit in zero_corrupt_bits:
             zero_corruptor |= 1 << bit
-        # ands zero-corruptor with original value
+        # Ands zero-corruptor with original value
         new_contents.append(bitwise_and(byte, zero_corruptor))
 
     # Create a Scapy packet from the scrambled packet data
@@ -225,7 +225,7 @@ def ScramblePackets(scrambling_method):
         # start a timer
         start_time = time.time()
 
-        # get current time
+        # Get current time
         def current_time():
             return datetime.now().strftime("%H:%M:%S")
 
@@ -233,7 +233,7 @@ def ScramblePackets(scrambling_method):
         print(
             f'{scrambling_method.__name__} with proportion {int(proportion * 100)} started at {current_time()}.')
 
-        # open the new file, file_name, to write to in bytes
+        # Open the new file, file_name, to write to in bytes
         with open(file_name, 'wb') as f:
             # Create a dpkt.pcap.Writer object
             pcap_writer = dpkt.pcap.Writer(f)
